@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../static/css/style.css" th:href="@{/css/style.css}">
+  <title>환자 상세</title>
+</head>
+<body>
+<form class="detail-container" th:action="@{|/patients/${patient.id}|}" th:object="${patient}" method="post">
+  <div class="info-group">
+    <p class="info-label">환자 상세 페이지</p>
+    <a th:href="@{/patients}" class="btn btn-link">목록으로</a>
+
+    <button type="button" id="update" class="btn btn-info">수정</button>
+    <button type="submit" id="save" class="btn btn-save btn-hide">저장</button>
+    <button type="submit"
+            th:formaction="@{|/patients/${patient.id}/delete|}"
+            onclick="return confirm('정말 삭제하시겠습니까?')"
+            id="delete"
+            class="btn btn-del">삭제</button>
+  </div>
+
+  <div class="info-group">
+    <label class="info-label" for="name">이름</label>
+    <input type="text" class="view-mode" th:field="*{name}" th:errorclass="field-error" readonly/>
+  </div>
+  <p class="error-text" th:errors="*{name}"></p>
+
+  <div class="info-group">
+    <label class="info-label" for="birth">생년월일</label>
+    <input type="text" class="view-mode" th:field="*{birth}" th:errorclass="field-error" readonly/>
+  </div>
+  <p class="error-text" th:errors="*{birth}"></p>
+
+  <div class="info-group">
+    <div class="gender-group">
+      <p class="info-label">성별</p>
+      <input type="radio" class="view-mode" th:field="*{gender}" value="male" disabled/>
+      <label for="gender1">남성</label>
+      <input type="radio" class="view-mode" th:field="*{gender}" value="female" disabled/>
+      <label for="gender2">여성</label>
+      <input type="radio" class="view-mode" th:field="*{gender}" value="other" disabled/>
+      <label for="gender3">기타</label>
+    </div>
+  </div>
+  <p class="error-text" th:errors="*{gender}"></p>
+
+  <div class="info-group">
+    <label class="info-label" for="cn">진료 내용(증상)</label>
+    <input type="text" class="view-mode" th:field="*{cn}" th:errorclass="field-error" readonly/>
+  </div>
+  <p class="error-text" th:errors="*{cn}"></p>
+
+  <div class="info-group">
+    <div th:if="${patient.storedFileName}">
+      <img th:src="|/images/${patient.storedFileName}|" width="200" alt="환자 사진">
+    </div>
+    <div th:unless="${patient.storedFileName}">
+      <p>등록된 사진이 없습니다.</p>
+    </div>
+  </div>
+</form>
+
+<script th:inline="javascript">
+  const btnUpdate = document.getElementById('update');
+  const btnSave = document.getElementById('save');
+
+  // 1. 수정 모드 전환 로직을 함수로 분리
+  function enableEditMode() {
+    console.log("수정 모드 활성화");
+    const viewModeInputs = document.querySelectorAll('.view-mode');
+
+    viewModeInputs.forEach(input => {
+      input.readOnly = false;
+      if (input.type === 'radio') {
+        input.disabled = false;
+      }
+      input.classList.remove('view-mode');
+      input.classList.add('edit-mode');
+    });
+
+    btnSave.classList.remove('btn-hide');
+    btnUpdate.classList.add('btn-hide');
+  }
+
+  // 2. 버튼 클릭 시 함수 호출
+  btnUpdate.addEventListener('click', enableEditMode);
+
+  // 3. 페이지 로드 시 에러가 있으면 함수 호출
+  window.onload = function() {
+    /* 타임리프 변수가 없을 경우를 대비해 기본값(false)을 설정하는 것이 안전합니다.
+       hasError가 null이거나 정의되지 않았을 때 에러를 방지합니다.
+    */
+    let hasError = [[${hasError}]] || false;
+
+  if (hasError) {
+    enableEditMode();
+  }
+  };
+</script>
+</script>
+</body>
+</html>

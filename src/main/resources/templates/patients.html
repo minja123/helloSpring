@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>환자 목록</title>
+	<link rel="stylesheet" href="../static/css/bootstrap.min.css"  th:href="@{/css/bootstrap.min.css}">
+	<link rel="stylesheet" href="../static/css/base.css" th:href="@{/css/base.css}">
+</head>
+<body>
+	<div class="search-container">
+		<form th:action="@{/patients}" method="get" class="search-form">
+			<input type="text"
+			       name="searchName"
+			       th:value="${param.searchName}"
+			       placeholder="환자 이름을 입력하세요"
+			       class="search-input">
+			<button type="submit" class="btn btn-info">검색</button>
+			<a th:href="@{/patients}" class="btn btn-link">초기화</a>
+		</form>
+	</div>
+
+	<div class="row mt-2">
+		<div class="col">
+			<button onclick="openModal()" class="btn btn-primary float-end">환자 등록</button>
+		</div>
+	</div>
+
+	<table class="simple-table">
+		<thead>
+			<th>ID</th>
+			<th>이름</th>
+			<th>생년월일</th>
+			<th>성별</th>
+			<th>설명</th>
+			<th>상세보기</th>
+		</thead>
+		<tbody>
+			<tr th:each="patient : ${patients}">
+				<td th:text="${patient.id}"></td>
+				<td>
+					<a th:href="@{|/patients/${patient.id}|}" th:text="${patient.name}">홍길동</a>
+				</td>
+				<td th:text="${patient.birth}"></td>
+				<td th:text="${patient.gender} == 'male' ? '남성' : '여성'"></td>
+				<td th:text="${patient.cn}"></td>
+				<td>
+					<a th:href="@{/patients/{id}(id=${patient.id})}" class="btn btn-info">상세보기</a>
+				</td>
+			</tr>
+			<tr th:if="${#lists.isEmpty(patients)}">
+				<td colspan="6" style="text-align: center; padding: 50px 0; color: #888;">
+					<p>검색 결과가 없습니다. 🔍</p>
+					<a th:if="${param.searchName}" th:href="@{/patients}" style="text-decoration: underline;">전체 목록 보기</a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<nav class="pagination-container" th:if="${page.totalPages > 0}">
+		<ul class="pagination"
+		    th:with="
+            currentPage = ${page.number},
+            totalPages = ${page.totalPages},
+            windowSize = 2,
+            start = ${(currentPage - windowSize) < 0 ? 0 : (currentPage - windowSize)},
+            end = ${(currentPage + windowSize) >= totalPages ? (totalPages - 1) : (currentPage + windowSize)}
+        ">
+
+			<li class="page-item" th:classappend="${page.first} ? 'disabled'">
+				<a class="page-link" th:href="@{/patients(page=0, searchName=${param.searchName})}">&laquo;&laquo;</a>
+			</li>
+
+			<li class="page-item" th:classappend="${!page.hasPrevious()} ? 'disabled'">
+				<a class="page-link" th:href="@{/patients(page=${page.number - 1}, searchName=${param.searchName})}">&laquo;</a>
+			</li>
+
+			<li class="page-item"
+			    th:each="idx : ${#numbers.sequence(start, end)}"
+			    th:classappend="${idx == currentPage} ? 'active'">
+				<a class="page-link"
+				   th:href="@{/patients(page=${idx}, searchName=${param.searchName})}"
+				   th:text="${idx + 1}">1</a>
+			</li>
+
+			<li class="page-item" th:classappend="${!page.hasNext()} ? 'disabled'">
+				<a class="page-link" th:href="@{/patients(page=${page.number + 1}, searchName=${param.searchName})}">&raquo;</a>
+			</li>
+
+			<li class="page-item" th:classappend="${page.last} ? 'disabled'">
+				<a class="page-link" th:href="@{/patients(page=${totalPages - 1}, searchName=${param.searchName})}">&raquo;&raquo;</a>
+			</li>
+		</ul>
+	</nav>
+
+
+	<div id="modalOverlay" class="modal-overlay">
+		<form class="simple-form" th:action="@{/patients}" th:object="${formData}" method="post" enctype="multipart/form-data">
+			<div class="form-group">
+				<label for="name">이름</label>
+				<input type="text" id="name" placeholder="이름을 입력해주세요." th:field="*{name}" th:errorclass="field-error" />
+				<p class="error-text" th:errors="*{name}"></p>
+			</div>
+			<div class="form-group">
+				<label for="birth">생년월일</label>
+				<input type="text" id="birth" placeholder="생년월일을 입력해주세요." th:field="*{birth}" th:errorclass="field-error" />
+				<p class="error-text" th:errors="*{birth}"></p>
+			</div>
+			<p class="label-title">성별</p>
+			<div class="gender-group">
+				<input type="radio" id="male" name="gender" value="male" th:field="*{gender}" checked>
+				<label for="male">남성</label>
+
+				<input type="radio" id="female" name="gender" value="female" th:field="*{gender}">
+				<label for="female">여성</label>
+
+				<input type="radio" id="other" name="gender" value="other" th:field="*{gender}">
+				<label for="other">기타</label>
+			</div>
+			<p class="error-text" th:errors="*{gender}"></p>
+			<div class="form-group">
+				<label for="cn">비고</label>
+				<textarea id="cn" placeholder="비고 입력해주세요." rows="4" th:field="*{cn}" ></textarea>
+				<p class="error-text" th:errors="*{cn}"></p>
+			</div>
+			<div class="form-group">
+				<label for="imageFile">환자 사진</label>
+				<input type="file" id="imageFile" name="imageFile" class="form-control" accept="image/*">
+			</div>
+
+			<div class="button-group">
+				<button type="button" class="close-btn" onclick="closeModal()">취소</button>
+				<button type="submit" class="submit-btn">저장</button>
+			</div>
+		</form>
+	</div>
+	
+
+	<script th:inline="javascript">
+		window.onload = function() {
+			// 서버에서 보낸 hasError 값이 true인지 확인
+			let hasError = [[${hasError}]];
+			const searchInput = document.querySelector('.search-input');
+			const val = searchInput.value;
+			//값이 있을 때만 포커스를 줍니다.
+			if (val) {
+				searchInput.focus();
+
+				searchInput.value = '';
+				searchInput.value = val;
+
+			}
+
+			if(hasError) {
+				openModal();
+			}
+		}
+
+		const modal = document.getElementById("modalOverlay");
+		// 모달 열기
+		function openModal() {
+			modal.style.display = 'flex';
+		}
+		// 모달 닫기
+		function closeModal() {
+			modal.style.display = 'none';
+		}
+		
+		window.onclick = function(event) {
+			if (event.target == modal) {}
+		}
+
+		// 입력할 때마다 0.5초 뒤에 자동으로 검색 폼을 전송하는 예시 (디바운싱)
+		let timer;
+		document.querySelector('.search-input').addEventListener('input', function() {
+			clearTimeout(timer);
+			timer = setTimeout(() => {
+			document.querySelector('.search-form').submit();
+			}, 500); // 0.5초 동안 입력이 없으면 검색 실행
+		});
+
+	</script>
+</body>
+</html>

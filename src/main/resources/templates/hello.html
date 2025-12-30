@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>타임리프 연습</title>
+</head>
+<body>
+	<h1>안녕하세요, <span th:text="${name}">사용자</span>님!</h1>
+
+	<div th:if="${isAdmin}">
+		<p style="color: red;">당신은 관리자 권한을 가지고 있습니다.</p>
+	</div>
+
+	<hr>
+	<p>서버 시간: <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd HH:mm')}">시간</span></p>
+</body>
+</html>

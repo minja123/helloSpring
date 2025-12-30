@@ -1,0 +1,34 @@
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-left: 4px;
+  font-weight: 400;
+  color: #555;
+  cursor: pointer;
+}
+.btn-link {
+  background-color: #0d6efd;
+  color: #ff2;
+  text-decoration: none;
+}
+
+.btn-info {
+  background-color: #5d22d5;
+  color: #fff
+  ;
+}
+
+.btn-save {
+  background-color: blue;
+  color: #fff;
+}
+
+.btn-del {
+  background-color: salmon;
+  color: #fff;
+}
+
+.btn-hide {
+  display: none;
+}

@@ -1,0 +1,104 @@
+@import url("button.css");
+
+.detail-container {
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.info-group {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding: 10px 0;
+}
+.info-label {
+  width: 150px;
+  font-weight: bold;
+  color: #555;
+}
+.info-content {
+  flex: 1;
+}
+/* .info-group input[type=text] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #555;
+  border-radius: 8px;
+} */
+.info-group input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0,123,255,0.2);
+}
+.gender-group {
+  display: flex;
+  gap: 10px;
+}
+.gender-group input[type=radio] {
+  display: none;
+}
+
+.gender-group label {
+  flex: 1; /*가로 길이를 동일하게 배분*/
+  text-align: center;
+  padding: 12px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: #fff;
+  color: #666;
+  transition: all 0.2s ease;
+  font-size: 15px;
+}
+
+/* 마우스를 올렸을 때 (Hover) */
+.gender-group label:hover {
+  background-color: #f8f9fa;
+  border-color: #ccc;
+}
+
+/* 선택되었을 때 스타일 (Checked) */
+.gender-group input[type="radio"]:checked + label {
+  background-color: #007bff; /* 포인트 컬러 */
+  color: #fff;
+  border-color: #007bff;
+  font-weight: bold;
+}
+
+.view-mode {
+  border: none;             /* 테두리 제거 */
+  background-color: transparent; /* 배경색 투명하게 */
+  outline: none;            /* 클릭 시 나타나는 파란 테두리(포커스) 제거 */
+  pointer-events: none;     /* 마우스 클릭이나 커서 반응 차단 (선택 사항) */
+  color: #333;              /* 텍스트 색상을 일반 글자처럼 설정 */
+  width: 100%;              /* 부모 너비에 맞춤 */
+  padding: 5px 0;           /* 텍스트와 줄 간격 조절 */
+  cursor: default;          /* 마우스 커서를 기본 화살표로 변경 */
+}
+
+/* 수정 모드일 때 (비교용) */
+.edit-mode {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.error-text {
+  color: red;
+}
+
+.field-error {
+  border: 1px solid red;
+}
+
+
+
+
+
+
