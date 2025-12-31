@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface PatientRepository extends JpaRepository<Patient, Long>, JpaSpecificationExecutor<Patient> {
+public interface PatientRepository extends JpaRepository<Patient, Long>, PatientRepositoryCustom {
 
     List<Patient> findByNameContaining(String name);
 

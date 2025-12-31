@@ -38,23 +38,23 @@ public class PatientService {
 
     public Page<Patient> getPatientList(PatientSearchCond cond, Pageable pageable) {
         // Specification을 사용하여 동적으로 쿼리 조건을 생성합니다.
-        Specification<Patient> spec = ((root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
+//        Specification<Patient> spec = ((root, query, cb) -> {
+//            List<Predicate> predicates = new ArrayList<>();
+//
+//            if (StringUtils.hasText(cond.getName())) {
+//                predicates.add(cb.like(root.get("name"), "%" + cond.getName() + "%"));
+//            }
+//            if (StringUtils.hasText(cond.getGender())) {
+//                predicates.add(cb.equal(root.get("gender"), cond.getGender()));
+//            }
+//            if (StringUtils.hasText(cond.getStartDate()) && StringUtils.hasText(cond.getEndDate())) {
+//                predicates.add(cb.between(root.get("birth"), cond.getStartDate(), cond.getEndDate()));
+//            }
+//
+//            return cb.and(predicates.toArray(new Predicate[0]));
+//        });
 
-            if (StringUtils.hasText(cond.getName())) {
-                predicates.add(cb.like(root.get("name"), "%" + cond.getName() + "%"));
-            }
-            if (StringUtils.hasText(cond.getGender())) {
-                predicates.add(cb.equal(root.get("gender"), cond.getGender()));
-            }
-            if (StringUtils.hasText(cond.getStartDate()) && StringUtils.hasText(cond.getEndDate())) {
-                predicates.add(cb.between(root.get("birth"), cond.getStartDate(), cond.getEndDate()));
-            }
-
-            return cb.and(predicates.toArray(new Predicate[0]));
-        });
-
-        return patientRepository.findAll(spec, pageable);
+        return patientRepository.search(cond, pageable);
     }
 
     public List<Patient> searchByName(String name) {
