@@ -2,17 +2,22 @@ package com.contect.hello.service;
 
 import com.contect.hello.domain.Patient;
 import com.contect.hello.domain.PatientForm;
+import com.contect.hello.domain.PatientSearchCond;
 import com.contect.hello.repository.PatientRepository;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -31,15 +36,25 @@ public class PatientService {
         return patientRepository.findAll();
     }
 
-    public Page<Patient> getPatientList(String searchName, int page) {
-        // 한 페이제에 10개씩, ID 역순(최신순)으로 정렬하는 요청서 생성
-        // 참고: JPA는  페이지 번호가 0부터 시작합니다.
-        Pageable pageable = PageRequest.of(page, 10, Sort.by("id").descending());
-        if (searchName == null || searchName.isBlank()) {
-            return patientRepository.findAll(pageable);
-        }
+    public Page<Patient> getPatientList(PatientSearchCond cond, Pageable pageable) {
+        // Specification을 사용하여 동적으로 쿼리 조건을 생성합니다.
+        Specification<Patient> spec = ((root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
 
-        return patientRepository.findByNameContaining(searchName, pageable);
+            if (StringUtils.hasText(cond.getName())) {
+                predicates.add(cb.like(root.get("name"), "%" + cond.getName() + "%"));
+            }
+            if (StringUtils.hasText(cond.getGender())) {
+                predicates.add(cb.equal(root.get("gender"), cond.getGender()));
+            }
+            if (StringUtils.hasText(cond.getStartDate()) && StringUtils.hasText(cond.getEndDate())) {
+                predicates.add(cb.between(root.get("birth"), cond.getStartDate(), cond.getEndDate()));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        });
+
+        return patientRepository.findAll(spec, pageable);
     }
 
     public List<Patient> searchByName(String name) {
