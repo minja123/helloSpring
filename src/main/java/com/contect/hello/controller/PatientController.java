@@ -1,8 +1,6 @@
 package com.contect.hello.controller;
 
-import com.contect.hello.domain.Patient;
-import com.contect.hello.domain.PatientForm;
-import com.contect.hello.domain.PatientSearchCond;
+import com.contect.hello.domain.*;
 import com.contect.hello.service.PatientService;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
@@ -23,7 +21,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -38,26 +39,17 @@ public class PatientController {
 
     @GetMapping("/api/patients")
     @ResponseBody
-    public ResponseEntity<Page<Patient>> getPatientApi(
+    public ResponseEntity<Page<PatientListResponse>> getPatientApi(
             PatientSearchCond cond,
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<Patient> patientList = patientService.getPatientList(cond, pageable);
-        return ResponseEntity.ok(patientList);
+
+        Page<PatientListResponse> patientListResponsePage = patientList.map(PatientListResponse::from);
+
+        return ResponseEntity.ok(patientListResponsePage);
     }
 
-//    @GetMapping("/patients")
-//    public String patients(@RequestParam(value = "searchName", required = false) String searchName,
-//                           @RequestParam(value = "page", defaultValue = "0") int page,
-//                           Model model) {
-//        Page<Patient> patientPage = patientService.getPatientList(searchName, page);
-//
-//        model.addAttribute("patients", patientPage.getContent());
-//        model.addAttribute("page", patientPage);
-//        model.addAttribute("formData", new PatientForm());
-//
-//        return "patients";
-//    }
 
     @PostMapping("/patients")
     public String save(@Valid @ModelAttribute("formData") PatientForm formData, BindingResult bindingResult, Model model) throws IOException {
@@ -90,17 +82,17 @@ public class PatientController {
 
     @GetMapping("/patients/{id}")
     public String findById(@PathVariable(name = "id") Long id, Model model) {
-        Patient patient = patientService.findById(id);
-        log.info("Patient={}",patient);
-        model.addAttribute("patient", patient);
+        PatientDetailResponse patientDetailResponse = patientService.findById(id);
+        log.info("Patient={}",patientDetailResponse);
+        model.addAttribute("patient", patientDetailResponse);
         return "patientDetail";
     }
 
     @GetMapping("/api/patients/{id}")
     @ResponseBody
-    public ResponseEntity<Patient> getFindById(@PathVariable(name = "id") Long id) {
-        Patient patient = patientService.findById(id);
-        return ResponseEntity.ok(patient);
+    public ResponseEntity<PatientDetailResponse> getFindById(@PathVariable(name = "id") Long id) {
+        PatientDetailResponse patientDetailResponse = patientService.findById(id);
+        return ResponseEntity.ok(patientDetailResponse);
     }
 
     @PutMapping(value = "/api/patients/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
@@ -148,6 +140,18 @@ public class PatientController {
     public String delete(@PathVariable(name = "id") Long id) {
         patientService.delete(id);
         return "redirect:/patients";
+    }
+
+    @PostMapping("/api/patients/{id}/memos")
+    public ResponseEntity<PatientDetailResponse> saveMemo(@PathVariable(name = "id") Long id,
+                                               @RequestBody Map<String,String> body) {
+
+        String content = body.get("content");
+        log.info("id={} memo={}", id, content);
+        patientService.addMemo(id,content);
+
+        PatientDetailResponse patientDetailResponse = patientService.findById(id);
+        return ResponseEntity.ok(patientDetailResponse);
     }
 
     /**

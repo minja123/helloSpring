@@ -1,8 +1,7 @@
 package com.contect.hello.service;
 
-import com.contect.hello.domain.Patient;
-import com.contect.hello.domain.PatientForm;
-import com.contect.hello.domain.PatientSearchCond;
+import com.contect.hello.domain.*;
+import com.contect.hello.repository.MemoRepository;
 import com.contect.hello.repository.PatientRepository;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +26,7 @@ public class PatientService {
 
     private final PatientRepository patientRepository;
     private final FileStore fileStore;
+    private final MemoRepository memoRepository;
 
     public Long count() {
         return patientRepository.count();
@@ -68,10 +68,10 @@ public class PatientService {
         return patientRepository.save(patient);
     }
 
-    public Patient findById(Long id) {
-        Patient patient = patientRepository.findById(id)
+    public PatientDetailResponse findById(Long id) {
+        Patient patient = patientRepository.findByIdWithMemos(id)
                 .orElseThrow(() -> new NoSuchElementException("해당 환자가 없습니다."));
-        return patient;
+        return PatientDetailResponse.from(patient);
     }
 
     @Transactional
@@ -100,6 +100,21 @@ public class PatientService {
                 .orElseThrow(() -> new NoSuchElementException("해당 환자가 없습니다."));
         patientRepository.delete(patient);
 
+    }
+
+    public void addMemo(Long id, String memo) {
+        Patient patient = patientRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("해당 환자가 없습니다"));
+
+        Memo memos = new Memo();
+        memos.setContent(memo);
+        memos.setPatient(patient);
+
+        memoRepository.save(memos);
+    }
+
+    public List<Memo> getMemosByPatientId(Long id) {
+        return memoRepository.findByPatientId(id);
     }
 
 

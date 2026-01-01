@@ -1,13 +1,14 @@
 package com.contect.hello.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,6 +24,9 @@ public class Patient {
     private String gender;
     private String cn;
     private String storedFileName;
+
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    private List<Memo> memos = new ArrayList<>();
 
 
     public Patient(String name, String birth, String gender, String cn, String storedFileName) {
