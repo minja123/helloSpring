@@ -22,6 +22,7 @@ import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PatientService {
 
     private final PatientRepository patientRepository;
@@ -95,13 +96,14 @@ public class PatientService {
                 updateForm.getCn());
     }
 
+    @Transactional
     public void delete(Long id) {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("해당 환자가 없습니다."));
         patientRepository.delete(patient);
-
     }
 
+    @Transactional
     public void addMemo(Long id, String memo) {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("해당 환자가 없습니다"));
@@ -115,6 +117,27 @@ public class PatientService {
 
     public List<Memo> getMemosByPatientId(Long id) {
         return memoRepository.findByPatientId(id);
+    }
+
+    @Transactional
+    public Long deleteMemo(Long id) {
+        Memo memo = memoRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("메모 정보가 존재하지 않습니다."));
+        Long patientId = memo.getPatient().getId();
+        memoRepository.delete(memo);
+        return patientId;
+    }
+
+    @Transactional
+    public Long updateMemo(Long memoId, String newContent) {
+        //1.수정할 메모를 영속성 컨텍스트에 올립니다.
+        Memo memo = memoRepository.findById(memoId)
+                .orElseThrow(() -> new NoSuchElementException("메모가 존재하지 않습니다."));
+
+        //2.객체의 값만 바꿉니다.
+        memo.setContent(newContent);
+
+        return memo.getPatient().getId();
     }
 
 

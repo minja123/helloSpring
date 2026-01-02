@@ -154,6 +154,27 @@ public class PatientController {
         return ResponseEntity.ok(patientDetailResponse);
     }
 
+    @PutMapping("/api/memos/{memoId}")
+    public ResponseEntity<PatientDetailResponse> updateMemo(
+            @PathVariable Long memoId,
+            @RequestBody Map<String, String> body
+    ) {
+        //1.수정 실행
+        Long patientId = patientService.updateMemo(memoId, body.get("content"));
+
+        //2. 수정된 후의 환자 정보를 다시 조회해서 반환 (화면 갱신용)
+        return ResponseEntity.ok(patientService.findById(patientId));
+    }
+
+    @DeleteMapping("/api/memos/{id}")
+    public ResponseEntity<PatientDetailResponse> deleteMemo(@PathVariable(name = "id") Long memoId) {
+        Long patientId = patientService.deleteMemo(memoId);
+        PatientDetailResponse patientDetailResponse = patientService.findById(patientId);
+        return ResponseEntity.ok(patientDetailResponse);
+    }
+
+
+
     /**
      * 테스트용 데이터 추가
      */
